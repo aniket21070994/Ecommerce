@@ -27,6 +27,7 @@ urlpatterns = [
     path('discounts/',include('discounts.urls')),
     path('coupons/',include('discounts.urls')),
     path('reviews/',include('products.urls')),
-    path('notifications/',include('notifications.urls'))
+    path('notifications/',include('notifications.urls')),
+    path('payment/',include('payment.urls'))
 
 ]
