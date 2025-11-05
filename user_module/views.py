@@ -1,49 +1,64 @@
 from django.shortcuts import render
-from rest_framework import response,authentication
+from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt import authentication
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView,status
 from django.contrib.auth.models import User
-from models_manager.models import UserProfile
+from models_manager.models import UserProfile 
+from django.contrib.auth import authenticate
 from .Serializer import UserProfileSerializer
 # Create your views here.
 "----------------------------user login / Signup Handlear section--------------------------------------------------------------------------------------------------------------------"
 class UserSignupHandler(APIView): 
-    
+    authentication_classes=[]
+    permission_classes=[AllowAny]
     def post(self,request): #signup
         username=request.data.get('username')
         password=request.data.get('password')
+        
         if username and password:
             new_user=User.objects.create_user(password=password,username=username)
+            recived_user=UserProfileSerializer(data=request.data)
+            # linking user to userprofile
+            if recived_user.is_valid():
+               recived_user['user']=new_user
+               recived_user.save()
+               
             token=RefreshToken.for_user(new_user)
-            return response({'message':"user created sucessfully"},status=status.HTTP_200_OK)
+            return Response({'message':"user created sucessfully"},status=status.HTTP_200_OK)
         else:
-            return response({"message":"inavlid data"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message":"inavlid data"},status=status.HTTP_400_BAD_REQUEST)
         
 class UserLoginHandler(APIView):
+    authentication_classes=[]
+    permission_classes=[AllowAny]
     def post(self,request):
         username=request.data.get('username')
         password=request.data.get('password')
         if username and password:
-            user=User.objects.filter(username=username).first()
+            user=User.objects.filter(username=username)
+            user=authenticate(username=username,password=password)
             if user is not None:
                 token=RefreshToken.for_user(user)
-                return response({'message':"user logged in sucessfully","token":str(token.access_token)},status=status.HTTP_200_OK)
+                return Response({'message':"user logged in sucessfully","token":str(token.access_token)},status=status.HTTP_200_OK)
             else:
-                return response({"message":"user not found"},status=status.HTTP_400_BAD_REQUEST)    
+                return Response({"message":"user not found"},status=status.HTTP_400_BAD_REQUEST)    
             
         else:
-            return response({",message":"invalid data"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({",message":"invalid data"},status=status.HTTP_400_BAD_REQUEST)
     
 "-------------------------------------------------------X----------------------------------------------------------------------------------------------"    
 
 "--------------------user profile handler----------------------------------------------------------------------------------------------------------------"
 class UserProfile(APIView):
-    authentication_classes=[authentication.TokenAuthentication]
+    
+   
     def get(self,request):
         user=request.user
         user_profile=UserProfile.objects.get(user=user)
         if user_profile:
-            return response({"message":"user profile found","user_profile":user_profile},status=status.HTTP_200_ok)
+            return Response({"message":"user profile found","user_profile":user_profile},status=status.HTTP_200_ok)
         
 
     def put(self,request):
@@ -51,28 +66,30 @@ class UserProfile(APIView):
         user_profile=UserProfileSerializer(data=request.data)
         if user_profile.is_valid():
             user_profile.save(user=user)
-            return response({"message":"user profile updated"},status=status.HTTP_200_OK)
+            return Response({"message":"user profile updated"},status=status.HTTP_200_OK)
         else:
-            return response({"message":"invalid data"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message":"invalid data"},status=status.HTTP_400_BAD_REQUEST)
 
 "-------------------------------------------------X-----------------------------------------------------------------------------------------------------"
 "-----------------------------------------Admin Handlear------------------------------------------------------------------------------------------------------------------"
 class AdminCreater(APIView):
+    permission_classes=[AllowAny]
     def post(self,request):
         username=request.data.get('username')
         password=request.data.get('password')
         if username and password:
             User.objects.create_superuser(username=username,password=password)
-            return response({"message":"admin created sucessfully"},status=status.HTTP_200_OK)  
+            return Response({"message":"admin created sucessfully"},status=status.HTTP_200_OK)  
         
         else:
-            return response({"message":"invalid data"},status=status.HTTP_400_BAD_REQUES)
+            return Response({"message":"invalid data"},status=status.HTTP_400_BAD_REQUES)
 "-------------------------------------------X-------------------------------------------------------------------------------------------------------------------"
 
 "-------------------------------------------Get UserList-------------------------------------------------------------------------------------------------------------------"
 class UserList(APIView):
+   
     def get(self,request):
         users=User.objects.all()
         serializer=UserProfileSerializer(users,many=True)
-        return response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 "--------------------------------------------X------------------------------------------------------------------------------------------------------------------------------"
