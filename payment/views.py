@@ -4,11 +4,13 @@ import stripe
 from Ecommerce.settings import secrate_stripe_key
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 stripe.api_key=secrate_stripe_key
 
 
 """---------------payment handlear (Stripe)----------------------------------"""
 class PaymentHandlear(APIView):
+    permission_classes=[AllowAny]
     def post(self,request):
         amount=request.data.get('amount')
         product=request.data.get('product')
