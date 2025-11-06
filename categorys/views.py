@@ -3,10 +3,13 @@ from models_manager.models import Category,Brand
 from .Serializer import CategorySerializer ,BrandSerializer
 from rest_framework.views import APIView,status
 from rest_framework import response
+from models_manager.Permissions import Admin,SuperAdmin
+from products.Permission import User
 
 "---------------------------------------list of category  (get list and create category)--------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 class ListCategory(APIView):
+    permission_classes=[Admin|SuperAdmin|User]
     def get(self,request):
         categories=Category.objects.all()
         serializer=CategorySerializer(categories,many=True)
@@ -27,6 +30,7 @@ class ListCategory(APIView):
 "--------------------------------------Update and Delete category---------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 class CategoryUpdateDelete(APIView):
+    permission_classes=[Admin|SuperAdmin]
     def put(self,request,id):
         category=Category.objects.get(id=id)
         serializer=CategorySerializer(category,data=request.data,partial=True)
@@ -46,6 +50,7 @@ class CategoryUpdateDelete(APIView):
 
 "--------------------------------------------------------- get and create brand---------------------------------------------------------------------------------------"
 class ListBrand(APIView):
+    permission_classes=[Admin|SuperAdmin|User]
     def get(self,request):   
         brands=Brand.objects.all()
         serializer=BrandSerializer(brands,many=True)

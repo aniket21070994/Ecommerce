@@ -29,6 +29,7 @@ class OrderStatusChoices(models.TextChoices):
     DELIVERED = 'DELIVERED', 'Delivered'
     CANCELLED = 'CANCELLED', 'Cancelled'
 
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
@@ -37,10 +38,6 @@ class UserProfile(models.Model):
     profile_image = models.ImageField(upload_to='profiles/', blank=True, null=True)
     default_address = models.ForeignKey('Address', on_delete=models.SET_NULL, null=True, blank=True)
     role = models.CharField(max_length=20, choices=RoleChoices.choices, default=RoleChoices.USER)
-
-    def save(self, *args, **kwargs):
-        self.user.profile = self  # Ensure back-reference if needed
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"

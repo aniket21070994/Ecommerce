@@ -10,6 +10,7 @@ stripe.api_key=secrate_stripe_key
 
 """---------------payment handlear (Stripe)----------------------------------"""
 class PaymentHandlear(APIView):
+   
     permission_classes=[AllowAny]
     def post(self,request):
         amount=request.data.get('amount')

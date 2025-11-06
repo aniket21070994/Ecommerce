@@ -7,28 +7,29 @@ from rest_framework.views import APIView,status
 from django.contrib.auth.models import User
 from models_manager.models import UserProfile 
 from django.contrib.auth import authenticate
-from .Serializer import UserProfileSerializer
+from .Serializer import signupSerializer,UserProfileSerializer
 # Create your views here.
 "----------------------------user login / Signup Handlear section--------------------------------------------------------------------------------------------------------------------"
 class UserSignupHandler(APIView): 
     authentication_classes=[]
     permission_classes=[AllowAny]
+    def post(self,request):
+            serializer_recived=signupSerializer(data=request.data)
+            if serializer_recived.is_valid():
+                user=serializer_recived.save()
+                token=RefreshToken.for_user(user)
+                return Response({'message':"user created sucessfully","refresh-token":str(token),"access-token":str(token.access_token)},status=status.HTTP_200_OK)
+
     def post(self,request): #signup
-        username=request.data.get('username')
-        password=request.data.get('password')
-        
-        if username and password:
-            new_user=User.objects.create_user(password=password,username=username)
-            recived_user=UserProfileSerializer(data=request.data)
-            # linking user to userprofile
-            if recived_user.is_valid():
-               recived_user['user']=new_user
-               recived_user.save()
-               
-            token=RefreshToken.for_user(new_user)
-            return Response({'message':"user created sucessfully"},status=status.HTTP_200_OK)
-        else:
-            return Response({"message":"inavlid data"},status=status.HTTP_400_BAD_REQUEST)
+            serializers=signupSerializer(data=request.data)
+            if serializers.is_valid():
+                new_user=serializers.save()
+                token=RefreshToken.for_user(new_user)
+                print(new_user)
+                return Response({'message':"user created sucessfully"},status=status.HTTP_200_OK)
+
+            else:
+                return Response({"message":"inavlid data"},status=status.HTTP_400_BAD_REQUEST)
         
 class UserLoginHandler(APIView):
     authentication_classes=[]
@@ -41,12 +42,12 @@ class UserLoginHandler(APIView):
             user=authenticate(username=username,password=password)
             if user is not None:
                 token=RefreshToken.for_user(user)
-                return Response({'message':"user logged in sucessfully","token":str(token.access_token)},status=status.HTTP_200_OK)
+                return Response({'message':"user logged in sucessfully","access-token":str(token.access_token),"refresh-token":str(token)},status=status.HTTP_200_OK)
             else:
                 return Response({"message":"user not found"},status=status.HTTP_400_BAD_REQUEST)    
             
         else:
-            return Response({",message":"invalid data"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message":"invalid data"},status=status.HTTP_400_BAD_REQUEST)
     
 "-------------------------------------------------------X----------------------------------------------------------------------------------------------"    
 
