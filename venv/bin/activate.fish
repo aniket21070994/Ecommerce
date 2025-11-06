@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV '/home/aniketmankar/Sdirect Folders/Django/ecommerce/venv'
+set -gx VIRTUAL_ENV '/home/aniketmankar/Sdirect Folders/Django/ecommerce/Ecommerce/venv'
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH

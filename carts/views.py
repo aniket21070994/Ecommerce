@@ -2,10 +2,11 @@ from rest_framework import response,status
 from models_manager.models import Cart,CartItem
 from rest_framework.views import APIView
 from .Serializer import CartSerializer,CartItemSerializer
-
+from models_manager.Permissions import User
 
 " ------------for operation on single cart---------------------------------------------------------------"
 class CartHandlear(APIView):
+    permission_classes=[User]
     def get(self,request):
         user=request.user
         cart=Cart.object.all(user=user)
@@ -29,6 +30,7 @@ class CartHandlear(APIView):
 "------------------------- cart item updater and deleter--------------------------------------------------------------------------------------------------------------"
 
 class CartSpecificUserHandler(APIView):
+   permission_classes=[User]
    def put(self,request,pk):
        cartItems=CartItem.objects.all(id=pk)
        cart_send_serializer=CartItemSerializer(cartItems,data=request.data)
