@@ -7,9 +7,9 @@ class Admin(BasePermission):
             return True
         else:
             return False
-class Subadmin(BasePermission):
+class SuperAdmin(BasePermission):
     def has_permission(self,request,view):
-        if request.user.userProfile=="Subadmin":
+        if request.user.userProfile=="SuperAdmin" | request.user.userProfile=="SUPER_ADMIN":
             return True
         else:
             return False
